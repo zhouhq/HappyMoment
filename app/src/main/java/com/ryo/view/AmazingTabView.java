@@ -15,6 +15,8 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.ryo.utils.TextUtils;
+
 import java.util.ArrayList;
 
 /**
@@ -146,31 +148,14 @@ public class AmazingTabView extends View implements IAmazingTabView {
      *********************/
     @Override
     public void setNormalTextSize(int size) {
-        Context c = getContext();
-        Resources r;
-        if (c == null) {
-            r = Resources.getSystem();
-        } else {
-            r = c.getResources();
-        }
-        float sizePx = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_SP, size, r.getDisplayMetrics());
-        normalTextSize = sizePx;
+
+        normalTextSize = TextUtils.spToPx(getContext(),size);
         setReCalculate(true);
     }
 
     @Override
     public void setSelectTextSize(int size) {
-        Context c = getContext();
-        Resources r;
-        if (c == null) {
-            r = Resources.getSystem();
-        } else {
-            r = c.getResources();
-        }
-        float sizePx = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_SP, size, r.getDisplayMetrics());
-        selectTextSize = sizePx;
+        selectTextSize = TextUtils.spToPx(getContext(),size);;
         setReCalculate(true);
     }
 
@@ -334,7 +319,8 @@ public class AmazingTabView extends View implements IAmazingTabView {
         if (info.index == selectTabIndex || info.index == selectTabIndex + 1) {
             canvas.saveLayer(startx, 0, startx + tabWidth, getHeight(), paint);
         }
-        canvas.drawText(info.text, startx + (tabWidth - (int) textW) / 2, (tabHeight - info.normalDrawHeight) / 2 + info.normalDrawHeight, paint);
+        int top=(int)(tabHeight - info.normalDrawHeight) / 2+getPaddingTop();
+        canvas.drawText(info.text, startx + (tabWidth - (int) textW) / 2, top + info.normalDrawHeight, paint);
         if (info.index == selectTabIndex) {
             paint.setXfermode(mode_src_in);
             paint.setColor(normalTextColor);
@@ -383,8 +369,9 @@ public class AmazingTabView extends View implements IAmazingTabView {
             float blank = tabWidth * (1 - lineBarRatio) / 2;
             float l = (selectTabIndex + selectTabIndexOffset) * tabWidth + blank;
             float r = l + tabWidth - blank * 2;
-            float t = tabRect.bottom - tabRect.height() * 0.05f;
-            float b = tabRect.bottom;
+            float h=tabRect.height() * 0.05f;
+            float t = tabRect.bottom - h +getPaddingTop();
+            float b = t +h;
             tempRect.set((int) l, (int) t, (int) r, (int) b);
             paint.setColor(defaultLineBarColor);
             canvas.drawRect(tempRect, paint);
@@ -490,4 +477,31 @@ public class AmazingTabView extends View implements IAmazingTabView {
         }
         
     }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int mode_w= MeasureSpec.getMode(widthMeasureSpec);
+        int size_w = MeasureSpec.getSize(widthMeasureSpec);
+        int mode=MeasureSpec.getMode(heightMeasureSpec);
+        float size = MeasureSpec.getSize(heightMeasureSpec);
+        switch (mode)
+        {
+            case MeasureSpec.EXACTLY:
+                break;
+            case MeasureSpec.AT_MOST:
+                if (selectTextSize <= 0) {
+                    size =(int) TextUtils.spToPx(getContext(),50);
+
+                } else {
+                    size=(int)selectTextSize;
+                }
+                size = size *1.2f;
+                size = size + getPaddingTop() + getPaddingBottom();
+                break;
+
+        }
+       setMeasuredDimension(size_w,(int)size);
+    }
+
+
 }
