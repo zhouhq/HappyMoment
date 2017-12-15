@@ -55,7 +55,8 @@ public class RecommendActivity extends Activity {
                 page.setCurrentItem(selectPage);
             }
         });
-        
+
+        tabView.setLineBarRes( new ColorDrawable(0xff03A9F4));
     }
     
     public class MyAdapter extends PagerAdapter{

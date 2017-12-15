@@ -385,7 +385,14 @@ public class AmazingTabView extends View implements IAmazingTabView {
             paint.setColor(defaultLineBarColor);
             canvas.drawRect(tempRect, paint);
         } else {
-
+            float blank = tabWidth * (1 - lineBarRatio) / 2;
+            float l = (selectTabIndex + selectTabIndexOffset) * tabWidth + blank;
+            float r = l + tabWidth - blank * 2;
+            float h = tabRect.height() * 0.05f;
+            float t = tabRect.bottom - h + getPaddingTop();
+            float b = t + h;
+            drawableLineBar.setBounds((int) l+getPaddingLeft(), (int) t, (int) r+getPaddingLeft(), (int) b);
+            drawableLineBar.draw(canvas);
         }
     }
 
