@@ -30,8 +30,8 @@ public class RecommendActivity extends Activity {
         setContentView(R.layout.recommend_activity);
         tabView= (AmazingTabView) findViewById(R.id.tab);
         
-        tabView.setMaxDisplayTab(4);
-        tabView.setTabBgRes(new ColorDrawable(0xffffffff));
+        //tabView.setMaxDisplayTab(4);
+        //tabView.setTabBgRes(new ColorDrawable(0xffffffff));
         tabView.addTabs(text);
 
         page = findViewById(R.id.page);
@@ -56,7 +56,7 @@ public class RecommendActivity extends Activity {
             }
         });
 
-        tabView.setLineBarRes( new ColorDrawable(0xff03A9F4));
+        //tabView.setLineBarRes( new ColorDrawable(0xff03A9F4));
     }
     
     public class MyAdapter extends PagerAdapter{

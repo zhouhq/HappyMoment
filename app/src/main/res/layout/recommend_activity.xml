@@ -1,17 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom ="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-  
+
+  <!--custom:normalTextSize="40dp"-->
+  <!--custom:selectTextSize="50dp"-->
   <com.ryo.view.AmazingTabView
       android:id="@+id/tab"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:paddingTop="0dp"
       android:paddingBottom="0dp"
+      custom:maxDisplayCount="2"
+      custom:normalTextColor="#ff00ff00"
+      custom:selectTextColor="#ff1f1f00"
+      custom:normalTextSizeRatio="0.5"
+      custom:selectTextSizeRatio="0.4"
+      custom:tabBackground="@drawable/bg"
+      custom:lightDrawable="@drawable/light"
       android:background="#00ff00ff"/>
   <android.support.v4.view.ViewPager
       android:id="@+id/page"

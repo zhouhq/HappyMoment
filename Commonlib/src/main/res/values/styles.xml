@@ -1,0 +1,24 @@
+<resources>
+    <attr name="normalTextSize" format="dimension"></attr>
+    <attr name="normalTextSizeRatio" format="float"></attr>
+    <attr name="selectTextSize" format="dimension"></attr>
+    <attr name="selectTextSizeRatio" format="float"></attr>
+    <attr name="normalTextColor" format="color"></attr>
+    <attr name="selectTextColor" format="color"></attr>
+    <attr name="maxDisplayCount" format="integer"></attr>
+    <attr name="tabBackground" format="reference"></attr>
+    <attr name="lightDrawable" format="reference"></attr>
+
+    <declare-styleable name="RyoTabView">
+        <attr name="normalTextSize" />
+        <attr name="normalTextSizeRatio" />
+        <attr name="selectTextSize" />
+        <attr name="selectTextSizeRatio" />
+        <attr name="normalTextColor" />
+        <attr name="selectTextColor" />
+        <attr name="maxDisplayCount" />
+        <attr name="tabBackground"/>
+        <attr name="lightDrawable"/>
+
+    </declare-styleable>
+</resources>
