@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.graphics.Xfermode;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -149,13 +150,14 @@ public class AmazingTabView extends View implements IAmazingTabView {
     @Override
     public void setNormalTextSize(int size) {
 
-        normalTextSize = TextUtils.spToPx(getContext(),size);
+        normalTextSize = TextUtils.spToPx(getContext(), size);
         setReCalculate(true);
     }
 
     @Override
     public void setSelectTextSize(int size) {
-        selectTextSize = TextUtils.spToPx(getContext(),size);;
+        selectTextSize = TextUtils.spToPx(getContext(), size);
+        ;
         setReCalculate(true);
     }
 
@@ -262,6 +264,9 @@ public class AmazingTabView extends View implements IAmazingTabView {
         if (pos >= maxDisplayCount - 2 && pos < tabs.size() - 2) {
             float scroll = tabWidth * (pos - (maxDisplayCount - 2) + posOffset);
             scrollTo((int) scroll, 0);
+        }else if(pos < maxDisplayCount - 2){
+            //没有超过指定位置时，要还原到初始位置，以免点标签时
+            scrollTo(0,0);
         }
 
         invalidate();
@@ -281,11 +286,14 @@ public class AmazingTabView extends View implements IAmazingTabView {
 
         TabInfo info;
         int x;
+        canvas.save();
+
         for (int i = 0; i < tabs.size(); i++) {
             info = tabs.get(i);
-            x = tabWidth * i;
+            x = tabWidth * i + getPaddingLeft();
             drawOneTab(canvas, info, x);
         }
+        canvas.restore();
         drawLineBar(canvas);
     }
 
@@ -295,7 +303,7 @@ public class AmazingTabView extends View implements IAmazingTabView {
     private void drawOneTab(Canvas canvas, TabInfo info, int startx) {
         // Log.e("zhouhq","onPageScrolled = "+selectTabIndex+"f="+selectTabIndexOffset);
         //在屏幕内的不用显示
-        if (!needDrawThisTab(info)) return;
+        if (!needDrawThisTab(info,startx)) return;
 
         float textW;
         float size;
@@ -319,14 +327,15 @@ public class AmazingTabView extends View implements IAmazingTabView {
         if (info.index == selectTabIndex || info.index == selectTabIndex + 1) {
             canvas.saveLayer(startx, 0, startx + tabWidth, getHeight(), paint);
         }
-        int top=(int)(tabHeight - info.normalDrawHeight) / 2+getPaddingTop();
+        canvas.clipRect(getPaddingLeft()+getScrollX(),0,getWidth() - getPaddingRight()+getScrollX(),getHeight(), Region.Op.REPLACE);
+        int top = (int) (tabHeight - info.normalDrawHeight) / 2 + getPaddingTop();
         canvas.drawText(info.text, startx + (tabWidth - (int) textW) / 2, top + info.normalDrawHeight, paint);
         if (info.index == selectTabIndex) {
             paint.setXfermode(mode_src_in);
             paint.setColor(normalTextColor);
             float l = (tabWidth - textW) / 2 + tabRect.left;
             float r = l + textW * selectTabIndexOffset;
-            canvas.drawRect(l + startx, tabRect.top, (int) r + startx, tabRect.bottom, paint);
+            canvas.drawRect(l + startx, tabRect.top + getPaddingTop(), (int) r + startx, tabRect.bottom + getPaddingTop(), paint);
             paint.setXfermode(mode_src_over);
             canvas.restore();
         } else if (info.index == selectTabIndex + 1) {
@@ -334,7 +343,7 @@ public class AmazingTabView extends View implements IAmazingTabView {
             paint.setColor(selectTextColor);
             float l = (tabWidth - textW) / 2 + tabRect.left;
             float r = l + textW * selectTabIndexOffset;
-            canvas.drawRect(l + startx, tabRect.top, (int) r + startx, tabRect.bottom, paint);
+            canvas.drawRect(l + startx, tabRect.top + getPaddingTop(), (int) r + startx, tabRect.bottom + getPaddingTop(), paint);
             paint.setXfermode(mode_src_over);
             canvas.restore();
         }
@@ -345,13 +354,13 @@ public class AmazingTabView extends View implements IAmazingTabView {
      * 是否需要绘制这个tab页
      * 不在当面的最大显示页范围内的不显示
      */
-    private boolean needDrawThisTab(TabInfo info) {
-        int l = info.index * tabWidth;
+    private boolean needDrawThisTab(TabInfo info,int startX) {
+        int l = startX;
         int r = l + tabWidth;
-        if (r - getScrollX() <= 0) {
+        if (r - getScrollX() <= getPaddingLeft()) {
             return false;
         }
-        if (l - getScrollX() >= tabWidth * maxDisplayCount) {
+        if (l - getScrollX() >= tabWidth * maxDisplayCount+getPaddingLeft()) {
             return false;
         }
         return true;
@@ -369,10 +378,10 @@ public class AmazingTabView extends View implements IAmazingTabView {
             float blank = tabWidth * (1 - lineBarRatio) / 2;
             float l = (selectTabIndex + selectTabIndexOffset) * tabWidth + blank;
             float r = l + tabWidth - blank * 2;
-            float h=tabRect.height() * 0.05f;
-            float t = tabRect.bottom - h +getPaddingTop();
-            float b = t +h;
-            tempRect.set((int) l, (int) t, (int) r, (int) b);
+            float h = tabRect.height() * 0.05f;
+            float t = tabRect.bottom - h + getPaddingTop();
+            float b = t + h;
+            tempRect.set((int) l+getPaddingLeft(), (int) t, (int) r+getPaddingLeft(), (int) b);
             paint.setColor(defaultLineBarColor);
             canvas.drawRect(tempRect, paint);
         } else {
@@ -384,7 +393,7 @@ public class AmazingTabView extends View implements IAmazingTabView {
      * 画整个tab的整体背景
      **/
     private void drawTagBg(Canvas canvas) {
-        tempRect.set(getPaddingLeft(), getPaddingTop(), getWidth() - getPaddingLeft(), getHeight() - getPaddingTop());
+        tempRect.set(0, 0, getWidth(), getHeight());
         tempRect.offset(getScrollX(), 0);
         if (drawableTabBg != null) {
             drawableTabBg.setBounds(tempRect);
@@ -452,7 +461,7 @@ public class AmazingTabView extends View implements IAmazingTabView {
             case MotionEvent.ACTION_DOWN:
                 downX = event.getX();
                 downTime = System.currentTimeMillis();
-                isMoving =false;
+                isMoving = false;
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (Math.abs(x - downX) > def_move_threshold) {
@@ -466,41 +475,42 @@ public class AmazingTabView extends View implements IAmazingTabView {
         }
         return true;
     }
-    /**处理放手事件，这里只处理点击事件
+
+    /**
+     * 处理放手事件，这里只处理点击事件
      * 后续滑动的以后再添加
-     * */
+     */
     private void handTouchUp(MotionEvent event) {
         if (!isMoving && System.currentTimeMillis() - downTime < def_click_time && listener != null) {
-            float x=event.getX()+getScrollX();
-            clickTabIndex=(int)x/(tabWidth);
+            float x = event.getX() + getScrollX() - getPaddingLeft();
+            clickTabIndex = (int) x / (tabWidth);
             listener.onSelect(clickTabIndex, selectTabIndex);
         }
-        
+
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int mode_w= MeasureSpec.getMode(widthMeasureSpec);
+        int mode_w = MeasureSpec.getMode(widthMeasureSpec);
         int size_w = MeasureSpec.getSize(widthMeasureSpec);
-        int mode=MeasureSpec.getMode(heightMeasureSpec);
+        int mode = MeasureSpec.getMode(heightMeasureSpec);
         float size = MeasureSpec.getSize(heightMeasureSpec);
-        switch (mode)
-        {
+        switch (mode) {
             case MeasureSpec.EXACTLY:
                 break;
             case MeasureSpec.AT_MOST:
                 if (selectTextSize <= 0) {
-                    size =(int) TextUtils.spToPx(getContext(),50);
+                    size = (int) TextUtils.spToPx(getContext(), 50);
 
                 } else {
-                    size=(int)selectTextSize;
+                    size = (int) selectTextSize;
                 }
-                size = size *1.2f;
+                size = size * 1.2f;
                 size = size + getPaddingTop() + getPaddingBottom();
                 break;
 
         }
-       setMeasuredDimension(size_w,(int)size);
+        setMeasuredDimension(size_w, (int) size);
     }
 
 
