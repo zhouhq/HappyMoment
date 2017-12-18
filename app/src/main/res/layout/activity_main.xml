@@ -13,23 +13,23 @@
   <Button
       android:id="@+id/send"
       android:layout_width="wrap_content"
-      android:text="事件"
+      android:text="增加"
       android:layout_height="wrap_content" />
   <Button
       android:id="@+id/sendsticky"
       android:layout_width="wrap_content"
-      android:text="粘性事件"
+      android:text="查询"
       android:layout_height="wrap_content" />
 
   <Button
       android:id="@+id/reg"
-      android:text="注明"
+      android:text="删除"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content" />
 
   <Button
       android:id="@+id/unreg"
-      android:text="注销"
+      android:text="更新"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content" />
   <com.ryo.view.AmazingTabView

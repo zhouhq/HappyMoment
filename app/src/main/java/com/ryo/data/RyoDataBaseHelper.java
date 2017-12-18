@@ -10,8 +10,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class RyoDataBaseHelper extends SQLiteOpenHelper {
     private static final String CRTATE_RECOMMDNE = "create table recommend( "+
-                                                    "id integer primary key autoincrement"+
-                                                    "title text"+
+                                                    "id integer primary key autoincrement,"+
+                                                    "title text,"+
                                                     "content text"+
                                                     ")";
                                                             ;

@@ -19,7 +19,7 @@ public class RecommendProvider extends ContentProvider {
     private static UriMatcher uriMatcher;
     private static final int RECOMMEND_DIR = 0;
     private static final int RECOMMEND_ITEM = 1;
-    private static final String RECOMMEND_TABLE = "recommend_table";
+    private static final String RECOMMEND_TABLE = "recommend";
     public static final String AUTHORITY = "com.ryo.happymoment.provider";
     public static final String Recommend_Uri="content://" + AUTHORITY + "/" + RECOMMEND_TABLE;
     private RyoDataBaseHelper dataBaseHelper;
@@ -35,7 +35,7 @@ public class RecommendProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         try {
-            dataBaseHelper = new RyoDataBaseHelper(this.getContext(), "recommend.db", null, 0);
+            dataBaseHelper = new RyoDataBaseHelper(this.getContext(), "recommend.db", null, 1);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -90,11 +90,31 @@ public class RecommendProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String s, String[] strings) {
-        return 0;
+        SQLiteDatabase database= dataBaseHelper.getReadableDatabase();
+        int count = 0;
+        switch (uriMatcher.match(uri)) {
+            case RECOMMEND_DIR:
+            case RECOMMEND_ITEM:
+                 count=database.delete(RECOMMEND_TABLE,s,strings);
+                break;
+            default:
+                break;
+        }
+        return count;
     }
 
     @Override
     public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
-        return 0;
+        SQLiteDatabase database= dataBaseHelper.getReadableDatabase();
+        int count = 0;
+        switch (uriMatcher.match(uri)) {
+            case RECOMMEND_DIR:
+            case RECOMMEND_ITEM:
+                count=database.update(RECOMMEND_TABLE,contentValues,s,strings);
+                break;
+            default:
+                break;
+        }
+        return count;
     }
 }

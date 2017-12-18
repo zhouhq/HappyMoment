@@ -3,12 +3,17 @@ package com.ryo.happymoment;
 
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.ryo.happymoment.recommend.RecommendProvider;
 import com.ryo.view.AmazingTabView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -37,28 +42,43 @@ public class MainActivity extends Activity implements View.OnClickListener {
         unreg = (Button) findViewById(R.id.unreg);
         unreg.setOnClickListener(this);
 
-        
     }
 
     @Override
     public void onClick(View view) {
+
+        ContentResolver resolver=getContentResolver();
         if (view == send) {
-            EventBus.getDefault().post(new MyEventMessage("这是测试文字", 1));
+
+            ContentValues values=new ContentValues();
+            values.put("title","这是标题");
+            values.put("content","这是内容，终于成功了 不容易呀再来一次");
+           resolver.insert(Uri.parse(RecommendProvider.Recommend_Uri),values);
             return;
         }
 
         if (view == sendSticky) {
-            EventBus.getDefault().postSticky(new MyEventMessage("这是粘性事件", 1));
+           Cursor cursor= resolver.query(Uri.parse(RecommendProvider.Recommend_Uri),new String[]{"title","content"},null,null,null);
+           while (cursor.moveToNext())
+           {
+               String title= cursor.getString(cursor.getColumnIndex("title"));
+               String content= cursor.getString(cursor.getColumnIndex("content"));
+               Log.e("zhouhq","title="+title+" content = "+content);
+           }
             return;
         }
         if (view == reg) {
-            EventBus.getDefault().register(this);
+           int count= resolver.delete(Uri.parse(RecommendProvider.Recommend_Uri),"title=?",new String[]{"这是标题"});
+           Log.e("zhouhq","删除记录结果="+count);
             return;
         }
         if (view == unreg) {
-            EventBus.getDefault().unregister(this);
-            return;
+            ContentValues values=new ContentValues();
+            values.put("content","测试更新");
+            resolver.update(Uri.parse(RecommendProvider.Recommend_Uri),values,"title= ?",new String[]{"这是标题3"});
         }
+
+
     }
 
     public static class MyEventMessage {
