@@ -16,6 +16,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider
+            android:authorities="com.ryo.happymoment.provider"
+            android:name=".recommend.RecommendProvider"></provider>
     </application>
 
 </manifest>
