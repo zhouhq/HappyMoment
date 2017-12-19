@@ -13,10 +13,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.ryo.happymoment.recommend.RecommendProvider;
-import com.ryo.view.AmazingTabView;
+import com.ryo.happymoment.data.RyoDataBaseHelper;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 public class MainActivity extends Activity implements View.OnClickListener {
@@ -53,12 +51,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
             ContentValues values=new ContentValues();
             values.put("title","这是标题");
             values.put("content","这是内容，终于成功了 不容易呀再来一次");
-           resolver.insert(Uri.parse(RecommendProvider.Recommend_Uri),values);
+           resolver.insert(Uri.parse(RyoDataBaseHelper.RecommendProvider.Recommend_Uri),values);
             return;
         }
 
         if (view == sendSticky) {
-           Cursor cursor= resolver.query(Uri.parse(RecommendProvider.Recommend_Uri),new String[]{"title","content"},null,null,null);
+           Cursor cursor= resolver.query(Uri.parse(RyoDataBaseHelper.RecommendProvider.Recommend_Uri),new String[]{"title","content"},null,null,null);
            while (cursor.moveToNext())
            {
                String title= cursor.getString(cursor.getColumnIndex("title"));
@@ -68,14 +66,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
             return;
         }
         if (view == reg) {
-           int count= resolver.delete(Uri.parse(RecommendProvider.Recommend_Uri),"title=?",new String[]{"这是标题"});
+           int count= resolver.delete(Uri.parse(RyoDataBaseHelper.RecommendProvider.Recommend_Uri),"title=?",new String[]{"这是标题"});
            Log.e("zhouhq","删除记录结果="+count);
             return;
         }
         if (view == unreg) {
             ContentValues values=new ContentValues();
             values.put("content","测试更新");
-            resolver.update(Uri.parse(RecommendProvider.Recommend_Uri),values,"title= ?",new String[]{"这是标题3"});
+            resolver.update(Uri.parse(RyoDataBaseHelper.RecommendProvider.Recommend_Uri),values,"title= ?",new String[]{"这是标题3"});
         }
 
 

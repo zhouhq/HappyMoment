@@ -2,6 +2,7 @@ package com.ryo.happymoment.recommend;
 
 import android.app.Activity;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -13,6 +14,7 @@ import android.widget.Button;
 import com.ryo.happymoment.R;
 import com.ryo.view.AmazingTabView;
 import com.ryo.view.IAmazingTabView;
+import com.ryo.view.TitleHeadView;
 
 import java.util.ArrayList;
 
@@ -56,6 +58,12 @@ public class RecommendActivity extends Activity {
             }
         });
 
+        TitleHeadView headView=(TitleHeadView)findViewById(R.id.head);
+        headView.setTitle("推荐");
+        headView.setTitleColor(0xffffffff);
+        Drawable drawable=getDrawable(R.drawable.icon);
+        headView.setLeftIcon(drawable);
+        headView.setRightIcon(drawable);
         //tabView.setLineBarRes( new ColorDrawable(0xff03A9F4));
     }
     

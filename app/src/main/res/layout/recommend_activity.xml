@@ -7,6 +7,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+  <com.ryo.view.TitleHeadView
+      android:id="@+id/head"
+      android:padding="10dp"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="#ff03A9F4"
+      android:visibility="visible">
+  </com.ryo.view.TitleHeadView>
   <!--custom:normalTextSize="40dp"-->
   <!--custom:selectTextSize="50dp"-->
   <com.ryo.view.AmazingTabView
@@ -15,14 +23,7 @@
       android:layout_height="wrap_content"
       android:paddingTop="0dp"
       android:paddingBottom="0dp"
-      custom:maxDisplayCount="2"
-      custom:normalTextColor="#ff00ff00"
-      custom:selectTextColor="#ff1f1f00"
-      custom:normalTextSizeRatio="0.5"
-      custom:selectTextSizeRatio="0.4"
-      custom:tabBackground="@drawable/bg"
-      custom:lightDrawable="@drawable/light"
-      android:background="#00ff00ff"/>
+      custom:maxDisplayCount="3" />
   <android.support.v4.view.ViewPager
       android:id="@+id/page"
       android:background="#00ff00ff"
