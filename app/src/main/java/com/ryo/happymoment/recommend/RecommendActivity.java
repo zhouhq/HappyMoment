@@ -1,6 +1,8 @@
 package com.ryo.happymoment.recommend;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.ryo.drawable.CircleImageDrawable;
 import com.ryo.happymoment.R;
 import com.ryo.view.AmazingTabView;
 import com.ryo.view.IAmazingTabView;
@@ -61,7 +64,10 @@ public class RecommendActivity extends Activity {
         TitleHeadView headView=(TitleHeadView)findViewById(R.id.head);
         headView.setTitle("推荐");
         headView.setTitleColor(0xffffffff);
-        Drawable drawable=getDrawable(R.drawable.icon);
+
+        Bitmap left= BitmapFactory.decodeResource(getResources(),R.drawable.icon);
+        CircleImageDrawable drawable= new CircleImageDrawable(left);
+
         headView.setLeftIcon(drawable);
         headView.setRightIcon(drawable);
         //tabView.setLineBarRes( new ColorDrawable(0xff03A9F4));

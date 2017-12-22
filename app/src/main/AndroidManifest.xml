@@ -19,7 +19,7 @@
         </activity>
         <provider
             android:authorities="com.ryo.happymoment.provider"
-            android:name=".data.RyoDataBaseHelper$RecommendProvider"></provider>
+            android:name=".data.RecommendProvider"></provider>
     </application>
 
 </manifest>

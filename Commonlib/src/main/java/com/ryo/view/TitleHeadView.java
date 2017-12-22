@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.commonlib.R;
+
 /**
  * Created by Ryo(zhouhq) on 2017/12/19.
  * 一个标题栏控制，包括左右两边的两个图标（可null）和中间的 标题
