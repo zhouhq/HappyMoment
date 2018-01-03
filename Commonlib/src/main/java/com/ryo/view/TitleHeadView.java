@@ -33,6 +33,12 @@ public class TitleHeadView extends RelativeLayout {
      **/
     private TextView titleView;
 
+    /**
+     * 左右按钮的点击事件监听器
+     * */
+    private View.OnClickListener leftClick;
+    private View.OnClickListener rightClick;
+
     public TitleHeadView(Context context) {
         super(context);
         init(context);
@@ -114,6 +120,15 @@ public class TitleHeadView extends RelativeLayout {
         rightIcon.setImageDrawable(drawable);
     }
 
+    /***设置右边的按钮的点击监听*/
+    public void setRightIconClickListener(View.OnClickListener clickListener) {
+        rightClick = clickListener;
+    }
+
+    /***设置左边的按钮的点击监听*/
+    public void setLeftIconClickListener(View.OnClickListener clickListener) {
+        leftClick = clickListener;
+    }
 
     /**
      * 创建左边的icon的view
@@ -127,6 +142,12 @@ public class TitleHeadView extends RelativeLayout {
         lp.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
         leftIcon.setLayoutParams(lp);
         addView(leftIcon);
+        leftIcon.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(leftClick!=null)leftClick.onClick(v);
+            }
+        });
     }
 
 
@@ -142,6 +163,12 @@ public class TitleHeadView extends RelativeLayout {
         lp.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
         rightIcon.setLayoutParams(lp);
         addView(rightIcon);
+        rightIcon.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(rightClick!=null)rightClick.onClick(v);
+            }
+        });
     }
 
 }
