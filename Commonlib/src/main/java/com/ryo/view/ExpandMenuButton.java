@@ -1,21 +1,35 @@
 package com.ryo.view;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import com.example.commonlib.R;
+
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Created by zhouhq on 2018/1/3.
  * 一个展开式菜单的按钮，点击时向左或者向右
  */
 
-public class ExpandMenuButton extends RelativeLayout {
+public class ExpandMenuButton extends ViewGroup implements View.OnClickListener {
+
+    private  interface OnClickMenu {
+         void onClick(int index);
+    }
+
+
     ArrayList<View> menus = new ArrayList<>();
     ArrayList<String> titles = new ArrayList<>();
 
@@ -23,6 +37,118 @@ public class ExpandMenuButton extends RelativeLayout {
      * 展开按钮，点击时展再，再点击时缩放
      */
     View expandButton;
+    int menuWidth = 50;
+    int menuHeight = 50;
+    int menuGap;
+
+    /**
+     * 展开按钮的资源
+     */
+    Drawable buttonDrawable;
+    Drawable buttonCloseDrawable;
+
+    /***
+     *是否是在展开的状态
+     * */
+    private boolean isExpandState = false;
+
+    OnClickMenu clickMenuListener;
+
+    private static final int ani_time=500;
+    @Override
+    public void onClick(View view) {
+        if (view == expandButton) {
+            if (!isExpandState) {
+                isExpandState = !isExpandState;
+                expandButton.setBackground(buttonCloseDrawable);
+                handleExpand();
+            } else {
+                isExpandState = !isExpandState;
+                expandButton.setBackground(buttonDrawable);
+                handleShrink();
+            }
+            return;
+        }
+
+        for (int i = 0; i < menus.size(); i++) {
+            View v = menus.get(i);
+            if (v != view) continue;
+            if (clickMenuListener != null) {
+                clickMenuListener.onClick(i);
+            }
+            return;
+        }
+
+    }
+
+    /**
+     * 将各个状态初始化到缩小不可见状态
+     * */
+    private void initShrink() {
+        ObjectAnimator expandButtonAni = ObjectAnimator.ofFloat(expandButton, "rotation", 0, 0f);
+        AnimatorSet set = new AnimatorSet();
+        LinkedList<Animator> aniList = new LinkedList<>();
+        for (int i = 0; i < menus.size(); i++) {
+            View v = menus.get(i);
+            int translateX = expandButton.getRight() - v.getRight();
+            PropertyValuesHolder translateXVH = PropertyValuesHolder.ofFloat("translationX", translateX, translateX);
+            PropertyValuesHolder rotationVH = PropertyValuesHolder.ofFloat("rotation", -180, -180);
+            PropertyValuesHolder alphaVH = PropertyValuesHolder.ofFloat("alpha", 0, 0);
+            ObjectAnimator menuAni = ObjectAnimator.ofPropertyValuesHolder(v, translateXVH, rotationVH, alphaVH);
+            aniList.add(menuAni);
+        }
+        aniList.add(expandButtonAni);
+
+
+        set.playTogether(aniList);
+        set.setDuration(1);
+        set.start();
+    }
+
+    private void handleExpand() {
+        ObjectAnimator expandButtonAni = ObjectAnimator.ofFloat(expandButton, "rotation", -180, 0f);
+        AnimatorSet set = new AnimatorSet();
+
+        LinkedList<Animator> aniList = new LinkedList<>();
+
+        for (int i = 0; i < menus.size(); i++) {
+            View v = menus.get(i);
+            int translateX = expandButton.getRight() - v.getRight();
+            PropertyValuesHolder translateXVH = PropertyValuesHolder.ofFloat("translationX", translateX, 0);
+            PropertyValuesHolder rotationVH = PropertyValuesHolder.ofFloat("rotation", -180, 0);
+            PropertyValuesHolder alphaVH = PropertyValuesHolder.ofFloat("alpha", 0, 1);
+            ObjectAnimator menuAni = ObjectAnimator.ofPropertyValuesHolder(v, translateXVH, rotationVH, alphaVH);
+            aniList.add(menuAni);
+        }
+        aniList.add(expandButtonAni);
+
+
+        set.playTogether(aniList);
+        set.setDuration(ani_time);
+        set.start();
+    }
+
+    private void handleShrink() {
+
+        AnimatorSet set = new AnimatorSet();
+        ObjectAnimator expandButtonAni = ObjectAnimator.ofFloat(expandButton, "rotation", 0, -180);
+        LinkedList<Animator> aniList = new LinkedList<>();
+
+        for (int i = 0; i < menus.size(); i++) {
+            View v = menus.get(i);
+            int translateX = expandButton.getRight() - v.getRight();
+            PropertyValuesHolder translateXVH = PropertyValuesHolder.ofFloat("translationX", 0, translateX);
+            PropertyValuesHolder rotationVH = PropertyValuesHolder.ofFloat("rotation", 0, -180);
+            PropertyValuesHolder alphaVH = PropertyValuesHolder.ofFloat("alpha", 1, 0);
+            ObjectAnimator menuAni = ObjectAnimator.ofPropertyValuesHolder(v, translateXVH, rotationVH, alphaVH);
+            aniList.add(menuAni);
+        }
+        aniList.add(expandButtonAni);
+
+        set.playTogether(aniList);
+        set.setDuration(ani_time);
+        set.start();
+    }
 
     enum ORIENTATION {
         LEFT, RIGHT, UP, DOWN
@@ -36,7 +162,7 @@ public class ExpandMenuButton extends RelativeLayout {
      * 设置一个展开方向
      * 分别是 上下左右4个方向
      **/
-    ORIENTATION orientation;
+    ORIENTATION orientation = ORIENTATION.RIGHT;
 
     public ExpandMenuButton(Context context) {
         super(context);
@@ -50,7 +176,19 @@ public class ExpandMenuButton extends RelativeLayout {
 
     private void init(Context context) {
         expandButton = new View(context);
+        buttonDrawable = getResources().getDrawable(R.drawable.menu_open);
+        buttonCloseDrawable = getResources().getDrawable(R.drawable.menu_close);
+        expandButton.setBackground(buttonDrawable);
         addView(expandButton);
+        expandButton.setOnClickListener(this);
+
+    }
+
+    /**
+     * 设置菜单之间的间隔
+     */
+    public void setMenuGap(int gap) {
+        menuGap = gap;
     }
 
     public void setOrientation(ORIENTATION orientation) {
@@ -68,6 +206,8 @@ public class ExpandMenuButton extends RelativeLayout {
             menus.add(view);
             view.setImageDrawable(drawable[i]);
             titles.add(name[i]);
+            addView(view,0);
+            view.setOnClickListener(this);
         }
     }
 
@@ -80,5 +220,132 @@ public class ExpandMenuButton extends RelativeLayout {
         menus.add(view);
         view.setImageDrawable(drawable);
         titles.add(name);
+        addView(view,0);
+        view.setOnClickListener(this);
     }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        switch (orientation)
+        {
+            case LEFT:
+                onLayoutLeft(changed, l, t, r, b);
+                break;
+            case UP:
+                break;
+            case RIGHT:
+                onLayoutRight(changed,l,t,r,b);
+
+        }
+        initShrink();
+    }
+
+    /***
+     * 向左展开
+     *
+     */
+    private void onLayoutLeft(boolean changed, int l, int t, int r, int b) {
+        int left;
+        int rihgt;
+        int top;
+        int bottom;
+
+        rihgt = r - l - getPaddingRight();
+        left = rihgt - menuWidth;
+        top = (b - t - getPaddingTop() - getPaddingRight() - menuHeight) / 2 + getPaddingTop();
+        bottom = top + menuHeight;
+        expandButton.layout(left, top, rihgt, bottom);
+
+        View v;
+        for (int i = 0; i < menus.size(); i++) {
+            v = menus.get(i);
+            rihgt = rihgt - menuWidth - menuGap;
+            left = rihgt - menuWidth;
+            v.layout(left, top, rihgt, bottom);
+        }
+    }
+
+    /***
+     * 向左展开
+     *
+     */
+    private void onLayoutRight(boolean changed, int l, int t, int r, int b) {
+        int left;
+        int rihgt;
+        int top;
+        int bottom;
+
+
+        left = getPaddingLeft();
+        rihgt = left + menuWidth;
+        top = (b - t - getPaddingTop() - getPaddingRight() - menuHeight) / 2 + getPaddingTop();
+        bottom = top + menuHeight;
+        expandButton.layout(left, top, rihgt, bottom);
+
+        View v;
+        for (int i = 0; i < menus.size(); i++) {
+            v = menus.get(i);
+            left = left + menuWidth + menuGap;
+            rihgt = left + menuWidth;
+            v.layout(left, top, rihgt, bottom);
+        }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+
+        if (orientation == ORIENTATION.DOWN || orientation == ORIENTATION.UP) {
+            onMeasureVertical(widthMeasureSpec, heightMeasureSpec);
+        } else {
+            onMeasureHorizontal(widthMeasureSpec, heightMeasureSpec);
+        }
+
+    }
+
+    /**
+     * 左右展开水平方向
+     * 测量结果是一样的
+     */
+    private void onMeasureHorizontal(int widthMeasureSpec, int heightMeasureSpec) {
+        int modeW = MeasureSpec.getMode(widthMeasureSpec);
+        int sizeW = MeasureSpec.getSize(widthMeasureSpec);
+        int measureW;
+        int modeH = MeasureSpec.getMode(heightMeasureSpec);
+        int sizeH = MeasureSpec.getSize(heightMeasureSpec);
+        int measureH;
+        switch (modeW) {
+            case MeasureSpec.EXACTLY:
+
+                measureW = sizeW;
+                break;
+            case MeasureSpec.AT_MOST:
+                //（菜单的宽+间隔）*个数+展开按按的宽+左右padding;
+                measureW = (menuWidth + menuGap) * menus.size() + menuWidth + getPaddingLeft() + getPaddingRight();
+                break;
+            default:
+                measureW = sizeW;
+
+        }
+        switch (modeH) {
+            case MeasureSpec.EXACTLY:
+                measureH = sizeH;
+                break;
+            case MeasureSpec.AT_MOST:
+                measureH = menuHeight + getPaddingTop() + getPaddingBottom();
+                break;
+            default:
+                measureH = sizeW;
+        }
+        setMeasuredDimension(measureW, measureH);
+    }
+
+    /**
+     * 上下展开水平方向
+     * 测量结果是一样的
+     */
+    private void onMeasureVertical(int widthMeasureSpec, int heightMeasureSpec) {
+
+
+    }
+
 }

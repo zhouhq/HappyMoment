@@ -16,6 +16,7 @@ import android.widget.Button;
 import com.ryo.drawable.CircleImageDrawable;
 import com.ryo.happymoment.R;
 import com.ryo.view.AmazingTabView;
+import com.ryo.view.ExpandMenuButton;
 import com.ryo.view.IAmazingTabView;
 import com.ryo.view.TitleHeadView;
 
@@ -71,6 +72,10 @@ public class RecommendActivity extends Activity {
         headView.setLeftIcon(drawable);
         headView.setRightIcon(drawable);
         //tabView.setLineBarRes( new ColorDrawable(0xff03A9F4));
+
+        ExpandMenuButton button=(ExpandMenuButton)findViewById(R.id.button);
+        button.setMenuGap(20);
+        button.addMenu(getDrawable(R.drawable.menu_close),"收藏");
     }
     
     public class MyAdapter extends PagerAdapter{
