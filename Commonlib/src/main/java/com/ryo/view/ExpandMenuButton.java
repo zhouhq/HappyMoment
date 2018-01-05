@@ -7,11 +7,14 @@ import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.example.commonlib.R;
 
@@ -25,21 +28,26 @@ import java.util.LinkedList;
 
 public class ExpandMenuButton extends ViewGroup implements View.OnClickListener {
 
-    private  interface OnClickMenu {
-         void onClick(int index);
+    private interface OnClickMenu {
+        void onClick(int index);
     }
 
-
+    /**
+     * 保存相关的菜单view
+     */
     ArrayList<View> menus = new ArrayList<>();
-    ArrayList<String> titles = new ArrayList<>();
+    ArrayList<TextView> titleViews = new ArrayList<>();
+
 
     /**
      * 展开按钮，点击时展再，再点击时缩放
      */
     View expandButton;
-    int menuWidth = 50;
-    int menuHeight = 50;
-    int menuGap;
+    int menuWidth = 100;
+    int menuHeight = 100;
+    int menuGap = 10;
+    int titleSize = 30;
+    int textViewSize = (int) (titleSize * 1.5f);
 
     /**
      * 展开按钮的资源
@@ -54,7 +62,11 @@ public class ExpandMenuButton extends ViewGroup implements View.OnClickListener 
 
     OnClickMenu clickMenuListener;
 
-    private static final int ani_time=500;
+    private static final int ani_time = 500;
+
+    AnimatorSet expandAni;
+    AnimatorSet shrinkAni;
+
     @Override
     public void onClick(View view) {
         if (view == expandButton) {
@@ -83,19 +95,22 @@ public class ExpandMenuButton extends ViewGroup implements View.OnClickListener 
 
     /**
      * 将各个状态初始化到缩小不可见状态
-     * */
+     */
     private void initShrink() {
         ObjectAnimator expandButtonAni = ObjectAnimator.ofFloat(expandButton, "rotation", 0, 0f);
         AnimatorSet set = new AnimatorSet();
         LinkedList<Animator> aniList = new LinkedList<>();
         for (int i = 0; i < menus.size(); i++) {
             View v = menus.get(i);
+            TextView textView = titleViews.get(i);
             int translateX = expandButton.getRight() - v.getRight();
             PropertyValuesHolder translateXVH = PropertyValuesHolder.ofFloat("translationX", translateX, translateX);
             PropertyValuesHolder rotationVH = PropertyValuesHolder.ofFloat("rotation", -180, -180);
             PropertyValuesHolder alphaVH = PropertyValuesHolder.ofFloat("alpha", 0, 0);
             ObjectAnimator menuAni = ObjectAnimator.ofPropertyValuesHolder(v, translateXVH, rotationVH, alphaVH);
+            ObjectAnimator titleAni = ObjectAnimator.ofPropertyValuesHolder(textView, translateXVH, alphaVH);
             aniList.add(menuAni);
+            aniList.add(titleAni);
         }
         aniList.add(expandButtonAni);
 
@@ -106,6 +121,10 @@ public class ExpandMenuButton extends ViewGroup implements View.OnClickListener 
     }
 
     private void handleExpand() {
+        if (expandAni != null) {
+            expandAni.end();
+            expandAni.start();
+        }
         ObjectAnimator expandButtonAni = ObjectAnimator.ofFloat(expandButton, "rotation", -180, 0f);
         AnimatorSet set = new AnimatorSet();
 
@@ -113,11 +132,22 @@ public class ExpandMenuButton extends ViewGroup implements View.OnClickListener 
 
         for (int i = 0; i < menus.size(); i++) {
             View v = menus.get(i);
-            int translateX = expandButton.getRight() - v.getRight();
-            PropertyValuesHolder translateXVH = PropertyValuesHolder.ofFloat("translationX", translateX, 0);
+            TextView textView = titleViews.get(i);
+            int translateX ;
+            PropertyValuesHolder translateXVH ;
+
+            if (orientation == ORIENTATION.LEFT || orientation == ORIENTATION.RIGHT) {
+                translateX = expandButton.getRight() - v.getRight();
+                translateXVH = PropertyValuesHolder.ofFloat("translationX", translateX, 0);
+            } else {
+                translateX = expandButton.getTop() - v.getTop();
+                translateXVH = PropertyValuesHolder.ofFloat("translationY", translateX, 0);
+            }
             PropertyValuesHolder rotationVH = PropertyValuesHolder.ofFloat("rotation", -180, 0);
             PropertyValuesHolder alphaVH = PropertyValuesHolder.ofFloat("alpha", 0, 1);
             ObjectAnimator menuAni = ObjectAnimator.ofPropertyValuesHolder(v, translateXVH, rotationVH, alphaVH);
+            ObjectAnimator titleAni = ObjectAnimator.ofPropertyValuesHolder(textView,translateXVH,alphaVH);
+            aniList.add(titleAni);
             aniList.add(menuAni);
         }
         aniList.add(expandButtonAni);
@@ -126,21 +156,36 @@ public class ExpandMenuButton extends ViewGroup implements View.OnClickListener 
         set.playTogether(aniList);
         set.setDuration(ani_time);
         set.start();
+        expandAni=set;
     }
 
     private void handleShrink() {
-
+        if (shrinkAni != null) {
+            shrinkAni.end();
+            shrinkAni.start();
+        }
         AnimatorSet set = new AnimatorSet();
         ObjectAnimator expandButtonAni = ObjectAnimator.ofFloat(expandButton, "rotation", 0, -180);
         LinkedList<Animator> aniList = new LinkedList<>();
 
         for (int i = 0; i < menus.size(); i++) {
             View v = menus.get(i);
-            int translateX = expandButton.getRight() - v.getRight();
-            PropertyValuesHolder translateXVH = PropertyValuesHolder.ofFloat("translationX", 0, translateX);
+            TextView textView = titleViews.get(i);
+            int translateX;
+            PropertyValuesHolder translateXVH;
+
+            if (orientation == ORIENTATION.LEFT || orientation == ORIENTATION.RIGHT) {
+                 translateX = expandButton.getRight() - v.getRight();
+                 translateXVH = PropertyValuesHolder.ofFloat("translationX", 0, translateX);
+            }else {
+                 translateX = expandButton.getTop() - v.getTop();
+                 translateXVH = PropertyValuesHolder.ofFloat("translationY", 0, translateX);
+            }
             PropertyValuesHolder rotationVH = PropertyValuesHolder.ofFloat("rotation", 0, -180);
             PropertyValuesHolder alphaVH = PropertyValuesHolder.ofFloat("alpha", 1, 0);
             ObjectAnimator menuAni = ObjectAnimator.ofPropertyValuesHolder(v, translateXVH, rotationVH, alphaVH);
+            ObjectAnimator titleAni = ObjectAnimator.ofPropertyValuesHolder(textView,translateXVH,alphaVH);
+            aniList.add(titleAni);
             aniList.add(menuAni);
         }
         aniList.add(expandButtonAni);
@@ -148,9 +193,10 @@ public class ExpandMenuButton extends ViewGroup implements View.OnClickListener 
         set.playTogether(aniList);
         set.setDuration(ani_time);
         set.start();
+        shrinkAni = set;
     }
 
-    enum ORIENTATION {
+    public enum ORIENTATION {
         LEFT, RIGHT, UP, DOWN
     }
 
@@ -202,12 +248,20 @@ public class ExpandMenuButton extends ViewGroup implements View.OnClickListener 
     public void addMenu(Drawable drawable[], String name[]) {
         int count = drawable.length < name.length ? drawable.length : name.length;
         for (int i = 0; i < count; i++) {
+            //增加并设置图标
             ImageView view = new ImageView(getContext());
             menus.add(view);
             view.setImageDrawable(drawable[i]);
-            titles.add(name[i]);
-            addView(view,0);
+            addView(view, 0);
             view.setOnClickListener(this);
+
+            //增加并设置标题
+            TextView textView = new TextView(getContext());
+            textView.setText(name[i]);
+            titleViews.add(textView);
+            textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, titleSize);
+            textView.setGravity(Gravity.CENTER);
+            addView(textView);
         }
     }
 
@@ -216,25 +270,36 @@ public class ExpandMenuButton extends ViewGroup implements View.OnClickListener 
      * 因些各个菜单对面的Index，使用者要自行保存
      */
     public void addMenu(Drawable drawable, String name) {
+        //增加并设置图标
         ImageView view = new ImageView(getContext());
         menus.add(view);
         view.setImageDrawable(drawable);
-        titles.add(name);
-        addView(view,0);
+        addView(view, 0);
         view.setOnClickListener(this);
+
+        //增加并设置标题
+        TextView textView = new TextView(getContext());
+        textView.setText(name);
+        titleViews.add(textView);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_PX, titleSize);
+        addView(textView);
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        switch (orientation)
-        {
+        switch (orientation) {
             case LEFT:
                 onLayoutLeft(changed, l, t, r, b);
                 break;
             case UP:
+                onLayoutUp(changed, l, t, r, b);
                 break;
             case RIGHT:
-                onLayoutRight(changed,l,t,r,b);
+                onLayoutRight(changed, l, t, r, b);
+                break;
+            case DOWN:
+                onLayoutDown(changed, l, t, r, b);
+                break;
 
         }
         initShrink();
@@ -252,21 +317,24 @@ public class ExpandMenuButton extends ViewGroup implements View.OnClickListener 
 
         rihgt = r - l - getPaddingRight();
         left = rihgt - menuWidth;
-        top = (b - t - getPaddingTop() - getPaddingRight() - menuHeight) / 2 + getPaddingTop();
+        top = (b - t - getPaddingTop() - getPaddingRight() - menuHeight - textViewSize) / 2 + getPaddingTop();
         bottom = top + menuHeight;
         expandButton.layout(left, top, rihgt, bottom);
 
         View v;
+        TextView textView;
         for (int i = 0; i < menus.size(); i++) {
             v = menus.get(i);
+            textView = titleViews.get(i);
             rihgt = rihgt - menuWidth - menuGap;
             left = rihgt - menuWidth;
             v.layout(left, top, rihgt, bottom);
+            textView.layout(left, bottom, rihgt, bottom + textViewSize);
         }
     }
 
     /***
-     * 向左展开
+     * 向右展开
      *
      */
     private void onLayoutRight(boolean changed, int l, int t, int r, int b) {
@@ -275,18 +343,90 @@ public class ExpandMenuButton extends ViewGroup implements View.OnClickListener 
         int top;
         int bottom;
 
-
         left = getPaddingLeft();
         rihgt = left + menuWidth;
-        top = (b - t - getPaddingTop() - getPaddingRight() - menuHeight) / 2 + getPaddingTop();
+        top = (b - t - getPaddingTop() - getPaddingRight() - menuHeight - textViewSize) / 2 + getPaddingTop();
         bottom = top + menuHeight;
         expandButton.layout(left, top, rihgt, bottom);
 
         View v;
+        TextView textView;
         for (int i = 0; i < menus.size(); i++) {
             v = menus.get(i);
             left = left + menuWidth + menuGap;
             rihgt = left + menuWidth;
+            v.layout(left, top, rihgt, bottom);
+            textView = titleViews.get(i);
+            textView.layout(left, bottom, rihgt, bottom + textViewSize);
+        }
+    }
+
+
+    /***
+     * 向下展开
+     *
+     */
+    private void onLayoutDown(boolean changed, int l, int t, int r, int b) {
+        int left;
+        int rihgt;
+        int top;
+        int bottom;
+
+        left = getPaddingLeft();
+        rihgt = left + menuWidth;
+
+        top = getPaddingTop();
+        bottom = top + menuHeight;
+        expandButton.layout(left, top, rihgt, bottom);
+
+        //加这一行是为了让第一个菜单和展开按钮的间距和其他菜单之间的看上去一致
+        bottom =bottom+textViewSize;
+
+        View v;
+        TextView textView;
+        for (int i = 0; i < menus.size(); i++) {
+            v = menus.get(i);
+            top = bottom + menuGap;
+            bottom = top + menuHeight;
+            v.layout(left, top, rihgt, bottom);
+
+            top=bottom;
+            bottom = top+textViewSize;
+            textView = titleViews.get(i);
+            textView.layout(left, top, rihgt, bottom);
+        }
+    }
+
+    /***
+     * 向上展开
+     */
+    private void onLayoutUp(boolean changed, int l, int t, int r, int b) {
+        int left;
+        int rihgt;
+        int top;
+        int bottom;
+
+        left = getPaddingLeft();
+        rihgt = left + menuWidth;
+
+
+        bottom = b-t-getPaddingBottom();
+        top = bottom - menuHeight;
+
+        expandButton.layout(left, top, rihgt, bottom);
+
+
+        View v;
+        TextView textView;
+        for (int i = 0; i < menus.size(); i++) {
+            v = menus.get(i);
+
+            bottom = top - menuGap;
+            top = bottom - textViewSize;
+            textView = titleViews.get(i);
+            textView.layout(left, top, rihgt, bottom);
+            bottom = top;
+            top = bottom - menuHeight;
             v.layout(left, top, rihgt, bottom);
         }
     }
@@ -331,7 +471,7 @@ public class ExpandMenuButton extends ViewGroup implements View.OnClickListener 
                 measureH = sizeH;
                 break;
             case MeasureSpec.AT_MOST:
-                measureH = menuHeight + getPaddingTop() + getPaddingBottom();
+                measureH = menuHeight + getPaddingTop() + getPaddingBottom() + textViewSize;
                 break;
             default:
                 measureH = sizeW;
@@ -344,7 +484,35 @@ public class ExpandMenuButton extends ViewGroup implements View.OnClickListener 
      * 测量结果是一样的
      */
     private void onMeasureVertical(int widthMeasureSpec, int heightMeasureSpec) {
+        int modeW = MeasureSpec.getMode(widthMeasureSpec);
+        int sizeW = MeasureSpec.getSize(widthMeasureSpec);
+        int measureW;
+        int modeH = MeasureSpec.getMode(heightMeasureSpec);
+        int sizeH = MeasureSpec.getSize(heightMeasureSpec);
+        int measureH;
+        switch (modeW) {
+            case MeasureSpec.EXACTLY:
 
+                measureW = sizeW;
+                break;
+            case MeasureSpec.AT_MOST:
+                measureW = getPaddingLeft() + getPaddingRight() + menuWidth;
+                break;
+            default:
+                measureW = sizeW;
+
+        }
+        switch (modeH) {
+            case MeasureSpec.EXACTLY:
+                measureH = sizeH;
+                break;
+            case MeasureSpec.AT_MOST:
+                measureH = (menuHeight + textViewSize + menuGap) * menus.size() + menuHeight + textViewSize + getPaddingTop() + getPaddingBottom();
+                break;
+            default:
+                measureH = sizeW;
+        }
+        setMeasuredDimension(measureW, measureH);
 
     }
 

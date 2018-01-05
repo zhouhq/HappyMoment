@@ -3,12 +3,10 @@ package com.ryo.happymoment.recommend;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -74,8 +72,26 @@ public class RecommendActivity extends Activity {
         //tabView.setLineBarRes( new ColorDrawable(0xff03A9F4));
 
         ExpandMenuButton button=(ExpandMenuButton)findViewById(R.id.button);
-        button.setMenuGap(20);
-        button.addMenu(getDrawable(R.drawable.menu_close),"收藏");
+        ExpandMenuButton button1=(ExpandMenuButton)findViewById(R.id.button1);
+        ExpandMenuButton button2=(ExpandMenuButton)findViewById(R.id.button2);
+        ExpandMenuButton button3=(ExpandMenuButton)findViewById(R.id.button3);
+
+
+
+        Drawable drawable1[]={getDrawable(R.drawable.menu_report),getDrawable(R.drawable.menu_share),getDrawable(R.drawable.menu_shielding)};
+        String title[] = {"举报","分享","屏蔽"};
+
+        button.setOrientation(ExpandMenuButton.ORIENTATION.RIGHT);
+        button.addMenu(drawable1,title);
+
+        button1.setOrientation(ExpandMenuButton.ORIENTATION.LEFT);
+        button1.addMenu(drawable1,title);
+
+        button2.setOrientation(ExpandMenuButton.ORIENTATION.UP);
+        button2.addMenu(drawable1,title);
+
+        button3.setOrientation(ExpandMenuButton.ORIENTATION.DOWN);
+        button3.addMenu(drawable1,title);
     }
     
     public class MyAdapter extends PagerAdapter{
