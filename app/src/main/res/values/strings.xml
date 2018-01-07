@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">HappyMoment</string>
+
+    <!-- 推荐-->
+    <string name="recommend_title">推荐</string>
+    <string name="recommend_tab_attention">关注</string>
+    <string name="recommend_tab_hot">热门</string>
+
+    <!-- 段子-->
+
+
+    <!-- 视频-->
 </resources>
